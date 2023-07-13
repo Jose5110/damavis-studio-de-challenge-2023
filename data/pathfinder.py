@@ -102,3 +102,16 @@ start = (0, (0, 1, 2))
 goal = (len(array)-1,len(array[0])-1)
 
 breadth_first_search(h_graph,start,goal)
+
+# Due to time constrains i won't be able to finish this piece of code so i will leave a general idea of my intention
+# Be it good or bad the idea is the following, if done without a system that avoid cycles as the BFS does, getting the
+# shortest path is really difficult (at least it was for me), as such the application of a shortest path algorithm
+# is almost mandatory. The problem is that BFS is not very good for this specific implementation due to all the extra
+# layers of complexity added such as the entity occupying more than one coordinate and the posibility of rotation.
+
+# In general the idea is to make two graphs which will contain both horizontal and veritical vertices and its edges,
+# then an extra step of logic in the BFS function will validate the point of rotation if the current vertex has 2
+# edges adjacent that indicate that the 3x3 zone around the rod is free, a list of vertex_formats can be used to
+# differentiate between vertical and horizontal. The rest of the function should stay almost the same.
+
+# Still i will be happy to answer any question within my capabilities.

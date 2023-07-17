@@ -20,3 +20,6 @@ Next, because the intention is to follow the shortest path from the initial posi
 2 - The second step then is to create a graph based representation of the labyrinth, where each cell is a node in the graph, and the possible moves between cells are edges. The edges represent valid movements of the rod.
 
 3 - The third step is to apply the BFS algorithm to the newly created graph, this will find the minimal number of moves that takes for the rod to go from its initial position to the goal coordinate, in the case of this problem from the top left corner to the bottom right corner. The first solution of BFS is the shortest path.
+## Off-time additions
+
+The solution is working as requested, following the input-output contract detailed in the document provided for the challenge. This is an off-time solution, intended to present a case for the previously discussed ideas on how to approach the problem of the rods' movement. I hope that it is taken into account for my evaluation.

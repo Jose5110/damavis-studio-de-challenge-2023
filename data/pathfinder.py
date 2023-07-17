@@ -1,8 +1,4 @@
 from collections import defaultdict, deque
-from data.labyrinth import Labyrinth
-
-labyrinth = Labyrinth('test_1')
-array = labyrinth.array_generator()
 
 def make_horizontal_graph(array):
     rows = len(array)
@@ -12,12 +8,15 @@ def make_horizontal_graph(array):
 
     for i in range(rows):
         for j in range(cols):
-            if array[i][j] == '#':
+            if (array[i][j] == '#') or (array[i][j] if j > cols-3 else False):
+                continue
+            
+            # Check if any coordinate of the vertex is over a blocked cell
+            if any(array[x][y] == '#' for x in range(i, i+1) for y in range(j, j+3) if 0 <= x < rows and 0 <= y < cols):
                 continue
             
             vertex = (i, (j,j+1,j+2))
             neighbors = []
-            # Check neighboring vertices and add edges accordingly
 
             # Check above neighbor
             if i > 0 and array[i - 1][j] != '#':
@@ -49,12 +48,16 @@ def make_vertical_graph(array):
 
     for i in range(rows):
         for j in range(cols):
-            if array[0][j] == '#' or array[0+1][j] == '#' or array[0+2][j] == '#':
+            if (array[i][j] == '#') or (array[i][j] if i > rows-3 else False):
+                continue
+            
+            # Check if any coordinate of the vertex is over a blocked cell
+            if any(array[x][y] == '#' for y in range(j, j+1) for x in range(i, i+3) if 0 <= x < rows and 0 <= y < cols):
                 continue
 
             vertex = ((i,i+1,i+2), j)
             neighbors = []
-            # This function is almost repeated for the sake of readability 
+            # This function is repeated for the sake of readability 
 
             # Check above neighbor
             if j > 0 and array[i][j - 1] != '#':
@@ -78,40 +81,63 @@ def make_vertical_graph(array):
 
     return graph_vertical
 
-def breadth_first_search(graph, start, goal):
+def free_area_check(coord, array, rows, cols):
+    x, y = coord
+
+    for i in range(x-1, x+2):
+        for j in range(y-1, y+2):
+            if (i, j) == (x, y):
+                continue
+            if not (0 <= i < rows and 0 <= j < cols):
+                return False
+            if array[i][j] == '#':
+                return False
+
+    return True
+
+def add_edges_between_graphs(graph1, graph2, array, vertex_formats):
+    rows = len(array)
+    cols = len(array[0])
+
+    for vertex1, edges1 in graph1.items():
+        if isinstance(vertex1, vertex_formats[0]):
+            x1 = vertex1[0]
+            y1 = vertex1[1][1]
+            for vertex2, edges2 in graph2.items():
+                if isinstance(vertex2, vertex_formats[1]):
+                    x2 = vertex2[0][1]
+                    y2 = vertex2[1]
+                    if (x1, y1) == (x2, y2) and free_area_check((x1, y1), array, rows, cols):
+                        edges1.append(vertex2)
+                    else:
+                        continue
+        # elif isinstance(vertex1, vertex_formats[1]):
+        #     x1 = vertex1[0][1]
+        #     y1 = vertex1[1]
+        #     for vertex2, edges2 in graph2.items():
+        #         if isinstance(vertex2, vertex_formats[0]):
+        #             x2 = vertex2[0]
+        #             y2 = vertex2[1][1]
+        #             if (x1, y1) == (x2, y2) and free_area_check((x1, y1), array, rows, cols):
+        #                 edges1.append(vertex2)
+        #             else:
+        #                 continue
+
+    return graph1
+
+def breadth_first_search(graph, start, goals, vertex_formats, goal_formats):
     queue = deque()
-    # Start with the start vertex (initial position) and a path (the path starts with the initial position accounted for)
     queue.append((start, [start]))
+
     while queue:
         vertex, path = queue.popleft()
-        
-        # Found the goal, return the path
-        if vertex == goal:
-            return path  
-        
+
+        if any(isinstance(vertex, format) for format in goal_formats):
+            if vertex in goals:
+                return path
+
         for neighbor in graph[vertex]:
-            if neighbor not in path:
+            if neighbor not in path and any(all(isinstance(x, t) for x, t in zip(neighbor, f)) for f in vertex_formats):
                 queue.append((neighbor, path + [neighbor]))
 
-    return -1 # No path found
-
-h_graph = make_horizontal_graph(array)
-v_graph = make_vertical_graph(array)
-
-start = (0, (0, 1, 2))
-goal = (len(array)-1,len(array[0])-1)
-
-breadth_first_search(h_graph,start,goal)
-
-# Due to time constrains i won't be able to finish this piece of code so i will leave a general idea of my intention
-# Be it good or bad the idea is the following, if done without a system that avoid cycles as the BFS does, getting the
-# shortest path is really difficult (at least it was for me), as such the application of a shortest path algorithm
-# is almost mandatory. The problem is that BFS is not very good for this specific implementation due to all the extra
-# layers of complexity added such as the entity occupying more than one coordinate and the posibility of rotation.
-
-# In general the idea is to make two graphs which will contain both horizontal and veritical vertices and its edges,
-# then an extra step of logic in the BFS function will validate the point of rotation if the current vertex has 2
-# edges adjacent that indicate that the 3x3 zone around the rod is free, a list of vertex_formats can be used to
-# differentiate between vertical and horizontal. The rest of the function should stay almost the same.
-
-# Still i will be happy to answer any question within my capabilities.
+    return -1

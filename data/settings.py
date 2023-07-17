@@ -2,8 +2,8 @@
 free_space_char = '.'
 blocked_space_char = '#'
 
-default = { 'width' : 12,
-            'height' : 9,
+default = { 'width' : 10,
+            'height' : 10,
             'blocked_coordinates' : [(1,5),(3,0),(8,9)]}
 
 test_1 = {'width' : 9,
